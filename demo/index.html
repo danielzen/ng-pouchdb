@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PouchDb Binding & Collection Demo</title>
+  <script src="../bower_components/pouchdb/dist/pouchdb.js"></script>
+  <script src="../bower_components/angular/angular.js"></script>
+  <script src="../bower_components/angular-pouchdb/angular-pouchdb.js"></script>
+  <script src="../ng-pouchdb-collection.js"></script>
+  <script src="../ng-pouchdb-binding.js"></script>
+  <script src="app.js"></script>
+
+</head>
+<body ng-app="app" ng-controller="App">
+<form action="">
+  <label>
+    First Name
+    <input type="text" ng-model="userInfo.firstName">
+  </label>
+  <label>
+    Last Name
+    <input type="text" ng-model="userInfo.lastName">
+  </label>
+</form>
+{{userInfo._rev}}
+
+<table>
+  <thead>
+  <tr>
+    <th>Title</th>
+    <th>Description</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="book in books">
+    <td><input ng-model="book.title"></td>
+    <td><input ng-model="book.description"></td>
+    <td>
+      <button ng-click="books.$update(book)">Update</button>
+      <button ng-click="books.$remove(book)">Remove</button>
+    </td>
+  </tr>
+  </tbody>
+</table>
+<form>
+  <legend>Add New</legend>
+  <label for="newBookTitle">Title</label>
+  <input type="text" ng-model="title" id="newBookTitle">
+  <label for="newBookDescription">Description</label>
+  <input type="text" ng-model="description" id="newBookDescription">
+  <button ng-click="books.$add({title: title, description: description})">Add</button>
+</form>
+</body>
+</html>

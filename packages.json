@@ -1,0 +1,29 @@
+{
+  "name": "ng-pouchdb",
+  "version": "0.0.1",
+  "description": "AngularJS  binding for PouchDB",
+  "main": "ng-pouchdb.js",
+  "scripts": {
+    "test": "./node_modules/karma/bin/karma start",
+    "watch": "./node_modules/karma/bin/karma start --autoWatch true --singleRun false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielzen/ng-pouchdb.git"
+  },
+  "keywords": [
+    "angular",
+    "pouchdb"
+  ],
+  "author": "Daniel Zen (http://zendigital.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danielzen/ng-pouchdb/issues"
+  },
+  "homepage": "https://github.com/danielzen/ng-pouchdb",
+  "devDependencies": {
+    "karma": "^0.12.17",
+    "karma-jasmine": "^0.2.2",
+    "karma-phantomjs-launcher": "^0.1.4"
+  }
+}
