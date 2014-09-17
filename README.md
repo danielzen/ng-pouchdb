@@ -19,7 +19,7 @@ Open in two different windows at the same time to see it do its thing...
 
 ## Authors
 
-* © 2014 Daniel Zen <http://zendigital.com>
+* © 2014 Daniel Zen, Zen Digital <http://zendigital.com>
 
 ## License
 
