@@ -50,6 +50,13 @@ angular.module('pouchdb')
         console.log('changed: ', index, item);
       }
 
+      function moveChild (from, to, item) {
+        collection.splice(from, 1);
+        collection.splice(to, 0, item);
+        updateIndexes(from, to);
+        console.log('moved: ', from, ' -> ', to, item);
+      }
+
       function updateIndexes(from, to) {
         var length = collection.length;
         to = to || length;
@@ -63,8 +70,8 @@ angular.module('pouchdb')
       db.changes({live: true, onChange: function(change) {
         if (!change.deleted) {
           db.get(change.id).then(function (data){
-            if (!indexes[change.id]) { // CREATE / READ
-              addChild(0, new PouchDbItem(data, 0)); // Forced index to 0
+            if (indexes[change.id]==undefined) { // CREATE / READ
+              addChild(collection.length, new PouchDbItem(data, collection.length)); // Add to end
               updateIndexes(0);
             } else { // UPDATE
               var index = indexes[change.id];
