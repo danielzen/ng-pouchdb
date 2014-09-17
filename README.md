@@ -4,7 +4,7 @@
 
 Based on Peter Bacon Darwin's https://github.com/petebacondarwin/angular-firebase
 
-Uses https://github.com/angular-pouchdb/angular-pouchdb which:
+Uses https://github.com/wspringer/angular-pouchdb which:
 
 * Wraps Pouch's methods with `$q`
 * Makes Angular aware of asynchronous updates (via `$rootScope.$apply`)
@@ -14,6 +14,8 @@ Uses https://github.com/angular-pouchdb/angular-pouchdb which:
 1. npm install
 2. bower install
 3. Run demo/index.html
+
+Open in two different windows at the same time to see it do its thing...
 
 ## Authors
 

@@ -22,7 +22,8 @@
     <input type="text" ng-model="userInfo.lastName">
   </label>
 </form>
-{{userInfo._rev}}
+Remote Syncing: <a href="#" ng-click="toggleOnline()">{{!online ? 'enable' : 'disable' }}</a><p>
+Remote Syncing demo requires a local CouchDb database configured at http://localhost:5984/_utils with CORS enabled
 
 <table>
   <thead>
