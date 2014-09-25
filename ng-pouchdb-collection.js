@@ -23,7 +23,7 @@ angular.module('pouchdb')
     return function(collectionUrl) {
       var collection = [];
       var indexes = {};
-      var db = collection.$db = new PouchDB(collectionUrl);
+      var db = collection.$db = PouchDB.create(collectionUrl);
 
       function getIndex(prevId) {
         return prevId ? indexes[prevId] + 1 : 0;
@@ -61,7 +61,7 @@ angular.module('pouchdb')
         var length = collection.length;
         to = to || length;
         if ( to > length ) { to = length; }
-        for(index = from; index < to; index++) {
+        for(var index = from; index < to; index++) {
           var item = collection[index];
           item.$index = indexes[item._id] = index;
         }
