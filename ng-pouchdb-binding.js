@@ -10,7 +10,7 @@ angular.module('pouchdb')
       if (!setObj) {
         throw new Error('expression ' + expression + 'must be assignable');
       }
-      var database = new PouchDB(reference);
+      var database = PouchDB.create(reference);
       database.get(expression).then(
         function(res) {
           setObj(scope, res);
