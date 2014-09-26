@@ -1,6 +1,6 @@
 angular.module('pouchdb')
 
-  .factory('pouchCollection', ['$timeout', 'PouchDB', function($timeout, PouchDB) {
+  .factory('pouchCollection', ['$timeout', 'pouchdb', function($timeout, pouchdb) {
 
     /**
      * @class item in the collection
@@ -23,7 +23,7 @@ angular.module('pouchdb')
     return function(collectionUrl) {
       var collection = [];
       var indexes = {};
-      var db = collection.$db = new PouchDB(collectionUrl);
+      var db = collection.$db = pouchdb.create(collectionUrl);
 
       function getIndex(prevId) {
         return prevId ? indexes[prevId] + 1 : 0;
@@ -79,7 +79,7 @@ angular.module('pouchdb')
               updateChild(index, item);
             }
           });
-        } else { //DELETE
+        } else if (collection.length && indexes[change.id]) { //DELETE
           removeChild(change.id);
           updateIndexes(indexes[change.id]);
         }
@@ -93,6 +93,7 @@ angular.module('pouchdb')
           }
         );
       };
+
       collection.$remove = function(itemOrId) {
         var item = angular.isString(itemOrId) ? collection[itemOrId] : itemOrId;
         db.remove(item)

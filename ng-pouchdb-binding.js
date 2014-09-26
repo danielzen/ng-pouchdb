@@ -2,7 +2,7 @@ angular.module('pouchdb')
 
 // This service binds the scope expression to a pouchdb/couchdb database.
 // There is no promise provided
-  .factory('pouchBindingSimple', ['$timeout', '$parse', 'PouchDB', function($timeout, $parse, PouchDB) {
+  .factory('pouchBindingSimple', ['$timeout', '$parse', 'pouchdb', function($timeout, $parse, pouchdb) {
     var stopTheWatch;
     return function(reference, scope, expression) {
       var getObj = $parse(expression);
@@ -10,7 +10,7 @@ angular.module('pouchdb')
       if (!setObj) {
         throw new Error('expression ' + expression + 'must be assignable');
       }
-      var database = new PouchDB(reference);
+      var database = pouchdb.create(reference);
       database.get(expression).then(
         function(res) {
           setObj(scope, res);
