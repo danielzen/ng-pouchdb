@@ -12,6 +12,11 @@
 
 </head>
 <body ng-app="app" ng-controller="App">
+    <H1>4-way data-binding using PouchDb & CouchDb</H1>
+<H3>1. A 3-way data-binding with localstore using a simple Pouch binding</H3>
+    <p>The following example represents a 3-way data-binding in the localstore using PouchDb.<br>
+    Open up two windows with this same page to see them stay in sync. This demo works due to
+        PouchDb's wonderful abstraction of localstorage</p>
 <form action="">
   <label>
     First Name
@@ -22,9 +27,17 @@
     <input type="text" ng-model="userInfo.lastName">
   </label>
 </form>
-Remote Syncing: <a href="#" ng-click="toggleOnline()">{{!online ? 'enable' : 'disable' }}</a><p>
-Remote Syncing demo requires a local CouchDb database configured at http://localhost:5984/_utils with CORS enabled
-
+<h3>2. A 3-way data-binding with a Pouch collection</h3>
+    <p>This too should work in two separate tabs on the same machine.</p>
+<form>
+  <legend>Add A book to the Collection:</legend>
+  <label for="newBookTitle">Title</label>
+  <input type="text" ng-model="title" id="newBookTitle">
+  <label for="newBookDescription">Description</label>
+  <input type="text" ng-model="description" id="newBookDescription">
+  <button ng-click="books.$add({title: title, description: description})">Add</button>
+</form>
+    <h5>The Library:</h5>
 <table>
   <thead>
   <tr>
@@ -44,14 +57,15 @@ Remote Syncing demo requires a local CouchDb database configured at http://local
   </tr>
   </tbody>
 </table>
-<form>
-  <legend>Add New</legend>
-  <label for="newBookTitle">Title</label>
-  <input type="text" ng-model="title" id="newBookTitle">
-  <label for="newBookDescription">Description</label>
-  <input type="text" ng-model="description" id="newBookDescription">
-  <button ng-click="books.$add({title: title, description: description})">Add</button>
-</form>
+<h3>3. Enable a 4-way binding by running a CouchDb instance</h3> 
+    <p> The CouchDb database should have CORS enabled.<br>  
+    $scope.sync is configured for <a href="http://localhost:5984/_utils">http://localhost:5984/_utils</a> in app.js
+    </p>
+
+        <P>
+4-way binding with Remote Syncing: <a href="#" ng-click="toggleOnline()">{{!online ? 'disabled' : 'enabled' }}</a><p>
+    </P>
+
 <p>
   <a href="https://github.com/danielzen/ng-pouchdb">ng-pouchdb</a> Copyright 2014 Daniel Zen, <a href="http://zendigital.com">Zen Digital</a><br>
   MIT LICENSE
