@@ -15,7 +15,7 @@
     "angular",
     "pouchdb"
   ],
-  "author": "Daniel Zen (http://zendigital.com/)",
+  "author": "Daniel Zen (http://zen.digital)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/danielzen/ng-pouchdb/issues"

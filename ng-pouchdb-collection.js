@@ -1,6 +1,6 @@
 angular.module('pouchdb')
 
-  .factory('pouchCollection', ['$timeout', 'pouchdb', function($timeout, pouchDB) {
+  .factory('pouchCollection', ['$timeout', 'pouchDB', function($timeout, pouchDB) {
 
     /**
      * @class item in the collection
