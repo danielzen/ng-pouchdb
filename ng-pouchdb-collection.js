@@ -1,6 +1,6 @@
 angular.module('pouchdb')
 
-  .factory('pouchCollection', ['$timeout', 'pouchdb', function($timeout, pouchdb) {
+  .factory('pouchCollection', ['$timeout', 'pouchdb', function($timeout, pouchDB) {
 
     /**
      * @class item in the collection
@@ -23,7 +23,7 @@ angular.module('pouchdb')
     return function(collectionUrl) {
       var collection = [];
       var indexes = {};
-      var db = collection.$db = pouchdb.create(collectionUrl);
+      var db = collection.$db = new pouchDB(collectionUrl);
 
       function getIndex(prevId) {
         return prevId ? indexes[prevId] + 1 : 0;
@@ -31,7 +31,7 @@ angular.module('pouchdb')
 
       function addChild(index, item) {
         indexes[item._id] = index;
-        collection.splice(index,0,item);
+        collection.splice(index, 0, item);
         console.log('added: ', index, item);
       }
 
@@ -45,12 +45,12 @@ angular.module('pouchdb')
         console.log('removed: ', id);
       }
 
-      function updateChild (index, item) {
+      function updateChild(index, item) {
         collection[index] = item;
         console.log('changed: ', index, item);
       }
 
-      function moveChild (from, to, item) {
+      function moveChild(from, to, item) {
         collection.splice(from, 1);
         collection.splice(to, 0, item);
         updateIndexes(from, to);
@@ -60,30 +60,34 @@ angular.module('pouchdb')
       function updateIndexes(from, to) {
         var length = collection.length;
         to = to || length;
-        if ( to > length ) { to = length; }
-        for(index = from; index < to; index++) {
+        if (to > length) {
+          to = length;
+        }
+        for (index = from; index < to; index++) {
           var item = collection[index];
           item.$index = indexes[item._id] = index;
         }
       }
 
-      db.changes({live: true, onChange: function(change) {
-        if (!change.deleted) {
-          db.get(change.id).then(function (data){
-            if (indexes[change.id]==undefined) { // CREATE / READ
-              addChild(collection.length, new PouchDbItem(data, collection.length)); // Add to end
-              updateIndexes(0);
-            } else { // UPDATE
-              var index = indexes[change.id];
-              var item = new PouchDbItem(data, index);
-              updateChild(index, item);
-            }
-          });
-        } else if (collection.length && indexes[change.id]) { //DELETE
-          removeChild(change.id);
-          updateIndexes(indexes[change.id]);
+      db.changes({
+        live: true, onChange: function(change) {
+          if (!change.deleted) {
+            db.get(change.id).then(function(data) {
+              if (indexes[change.id] == undefined) { // CREATE / READ
+                addChild(collection.length, new PouchDbItem(data, collection.length)); // Add to end
+                updateIndexes(0);
+              } else { // UPDATE
+                var index = indexes[change.id];
+                var item = new PouchDbItem(data, index);
+                updateChild(index, item);
+              }
+            });
+          } else if (collection.length && indexes[change.id]) { //DELETE
+            removeChild(change.id);
+            updateIndexes(indexes[change.id]);
+          }
         }
-      }});
+      });
 
       collection.$add = function(item) {
         db.post(angular.copy(item)).then(
@@ -108,7 +112,7 @@ angular.module('pouchdb')
           }
         });
         db.get(item._id).then(
-          function (res) {
+          function(res) {
             db.put(copy, res._rev);
           }
         );

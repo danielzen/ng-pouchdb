@@ -1,14 +1,15 @@
 {
   "name": "ng-pouchdb",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "authors": [
-    "Daniel Zen <http://zendigital.com>"
+    "Daniel Zen <http://zen.digital>"
   ],
   "description": "AngularJS binding & collection for PouchDb",
   "main": "ng-pouchdb.js",
   "keywords": [
     "angularjs",
-    "pouchdb"
+    "pouchdb",
+    "zendigital"
   ],
   "license": "MIT",
   "homepage": "https://github.com/danielzen/ng-pouchdb",
@@ -17,15 +18,14 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "karma.conf.js"
   ],
   "dependencies": {
-    "angular-pouchdb": "0.1",
     "angular": "~1.3",
     "pouchdb": "~3"
   },
-  "resolutions": {
-    "angular": "1.3",
-    "pouchdb": "~3"
+  "devDependencies": {
+    "angular-mocks": "~1.3",
+    "es5-shim": "~4.1"
   }
 }

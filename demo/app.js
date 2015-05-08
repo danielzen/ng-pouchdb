@@ -1,5 +1,5 @@
 angular.module('app', ['pouchdb'])
-.controller('App', function($scope, pouchCollection, pouchBindingSimple) {
+.controller('App', function($scope, pouchBindingSimple, pouchCollection) {
     $scope.books = pouchCollection('books');
     $scope.userInfo = {
     firstName: 'Jo', lastName: 'Bloggs'
