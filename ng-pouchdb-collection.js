@@ -1,6 +1,6 @@
 angular.module('pouchdb')
 
-  .factory('pouchCollection', ['$timeout', 'pouchDB', function($timeout, pouchDB) {
+  .factory('pouchCollection', ['$timeout', 'pouchdb', function($timeout, pouchDB) {
 
     /**
      * @class item in the collection
@@ -23,7 +23,7 @@ angular.module('pouchdb')
     return function(collectionUrl) {
       var collection = [];
       var indexes = {};
-      var db = collection.$db = new pouchDB(collectionUrl);
+      var db = collection.$db = pouchDB.create(collectionUrl);
 
       function getIndex(prevId) {
         return prevId ? indexes[prevId] + 1 : 0;

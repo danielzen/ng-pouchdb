@@ -1,89 +1,242 @@
-'use strict';
+(function() {
+  var concat, exists, indexOf, pouchdb, slice, sortedIndex;
 
-angular.module('pouchdb', [])
-  .constant('POUCHDB_METHODS', {
-    destroy: 'qify',
-    put: 'qify',
-    post: 'qify',
-    get: 'qify',
-    remove: 'qify',
-    bulkDocs: 'qify',
-    allDocs: 'qify',
-    putAttachment: 'qify',
-    getAttachment: 'qify',
-    removeAttachment: 'qify',
-    query: 'qify',
-    viewCleanup: 'qify',
-    info: 'qify',
-    compact: 'qify',
-    revsDiff: 'qify',
-    changes: 'eventEmitter',
-    sync: 'eventEmitter',
-    replicate: {
-      to: 'eventEmitter',
-      from: 'eventEmitter'
-    }
-  })
-  .service('pouchDBDecorators', function($q) {
-    this.qify = function(fn) {
-      return function() {
-        return $q.when(fn.apply(this, arguments));
-      };
-    };
+  pouchdb = angular.module('pouchdb', ['ng']);
 
-    this.eventEmitter = function(fn) {
-      return function() {
-        var deferred = $q.defer();
-        var emitter = fn.apply(this, arguments)
-          .on('change', function(change) {
-            return deferred.notify({
-              change: change
-            });
-          })
-          .on('uptodate', function(uptodate) {
-            return deferred.notify({
-              uptodate: uptodate
-            });
-          })
-          .on('complete', function(response) {
-            return deferred.resolve(response);
-          })
-          .on('error', function(error) {
-            return deferred.reject(error);
-          });
-        emitter.$promise = deferred.promise;
-        return emitter;
-      };
-    };
-  })
-  .provider('pouchDB', function(POUCHDB_METHODS) {
-    var self = this;
-    self.methods = POUCHDB_METHODS;
-    self.$get = function($window, pouchDBDecorators) {
-      function wrapMethods(db, methods, parent) {
-        for (var method in methods) {
-          var wrapFunction = methods[method];
+  slice = Array.prototype.slice;
 
-          if (!angular.isString(wrapFunction)) {
-            wrapMethods(db, wrapFunction, method);
-            continue;
-          }
+  concat = Array.prototype.concat;
 
-          wrapFunction = pouchDBDecorators[wrapFunction];
-
-          if (!parent) {
-            db[method] = wrapFunction(db[method]);
-            continue;
-          }
-
-          db[parent][method] = wrapFunction(db[parent][method]);
-        }
-        return db;
+  sortedIndex = function(array, value, callback) {
+    var high, low, mid;
+    low = 0;
+    high = array != null ? array.length : low;
+    callback = callback || identity;
+    value = callback(value);
+    while (low < high) {
+      mid = (low + high) >>> 1;
+      if (callback(array[mid]) < value) {
+        low = mid + 1;
+      } else {
+        high = mid;
       }
+    }
+    return low;
+  };
 
-      return function pouchDB(name, options) {
-        var db = new $window.PouchDB(name, options);
-        return wrapMethods(db, self.methods);
-      };
+  indexOf = function(array, cond) {
+    var pos;
+    pos = 0;
+    while (pos < array.length && !cond(array[pos])) {
+      pos = pos + 1;
+    }
+    if (pos < array.length) {
+      return pos;
+    } else {
+      return -1;
+    }
+  };
+
+  exists = function(array, cond) {
+    return indexOf(array, cond) >= 0;
+  };
+
+  pouchdb.provider('pouchdb', function() {
+    return {
+      withAllDbsEnabled: function() {
+        return PouchDB.enableAllDbs = true;
+      },
+      $get: function($q, $rootScope, $timeout) {
+        var qify;
+        qify = function(fn) {
+          return function() {
+            var args, callback, deferred;
+            deferred = $q.defer();
+            callback = function(err, res) {
+              return $timeout(function() {
+                if (err) {
+                  return deferred.reject(err);
+                } else {
+                  return deferred.resolve(res);
+                }
+              });
+            };
+            args = arguments != null ? slice.call(arguments) : [];
+            args.push(callback);
+            fn.apply(this, args);
+            return deferred.promise;
+          };
+        };
+        return {
+          create: function(name, options) {
+            var db;
+            db = new PouchDB(name, options);
+            return {
+              id: db.id,
+              put: qify(db.put.bind(db)),
+              post: qify(db.post.bind(db)),
+              get: qify(db.get.bind(db)),
+              remove: qify(db.remove.bind(db)),
+              bulkDocs: qify(db.bulkDocs.bind(db)),
+              allDocs: qify(db.allDocs.bind(db)),
+              changes: function(options) {
+                var clone;
+                clone = angular.copy(options);
+                clone.onChange = function(change) {
+                  return $rootScope.$apply(function() {
+                    return options.onChange(change);
+                  });
+                };
+                return db.changes(clone);
+              },
+              putAttachment: qify(db.putAttachment.bind(db)),
+              getAttachment: qify(db.getAttachment.bind(db)),
+              removeAttachment: qify(db.removeAttachment.bind(db)),
+              query: qify(db.query.bind(db)),
+              info: qify(db.info.bind(db)),
+              compact: qify(db.compact.bind(db)),
+              revsDiff: qify(db.revsDiff.bind(db)),
+              replicate: {
+                to: db.replicate.to.bind(db),
+                from: db.replicate.from.bind(db),
+                sync: db.replicate.sync.bind(db)
+              },
+              destroy: qify(db.destroy.bind(db))
+            };
+          }
+        };
+      }
     };
   });
+
+  pouchdb.directive('pouchRepeat', function($parse, $animate) {
+    return {
+      transclude: 'element',
+      priority: 10,
+      compile: function(elem, attrs, transclude) {
+        return function($scope, $element, $attr) {
+          var add, blocks, collection, cursor, fld, getters, modify, parent, remove, sort, top, vectorOf, _ref;
+          parent = $element.parent();
+          top = angular.element(document.createElement('div'));
+          parent.append(top);
+          _ref = /^\s*([a-zA-Z0-9]+)\s*in\s*([a-zA-Z0-9]+)\s*(?:order by\s*([a-zA-Z0-9\.,]+))?$/.exec($attr.pouchRepeat).splice(1), cursor = _ref[0], collection = _ref[1], sort = _ref[2];
+          blocks = [];
+          vectorOf = sort != null ? (getters = (function() {
+            var _i, _len, _ref1, _results;
+            _ref1 = sort.split(',');
+            _results = [];
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+              fld = _ref1[_i];
+              _results.push($parse(fld));
+            }
+            return _results;
+          })(), function(doc) {
+            var getter, _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = getters.length; _i < _len; _i++) {
+              getter = getters[_i];
+              _results.push(getter(doc));
+            }
+            return _results;
+          }) : null;
+          add = function(doc) {
+            var childScope;
+            childScope = $scope.$new();
+            childScope[cursor] = doc;
+            return transclude(childScope, function(clone) {
+              var block, index, last, preceding;
+              block = {
+                doc: doc,
+                clone: clone,
+                scope: childScope,
+                vector: vectorOf != null ? vectorOf(doc) : null
+              };
+              last = blocks[blocks.length - 1];
+              if (vectorOf != null) {
+                index = sortedIndex(blocks, block, function(block) {
+                  return block.vector;
+                });
+                preceding = index > 0 ? blocks[index - 1] : null;
+                $animate.enter(clone, parent, preceding != null ? preceding.clone : top);
+                return blocks.splice(index, 0, block);
+              } else {
+                blocks.push(block);
+                if (last != null) {
+                  return $animate.enter(clone, parent, last.clone);
+                } else {
+                  return $animate.enter(clone, parent, top);
+                }
+              }
+            });
+          };
+          modify = function(doc) {
+            var block, idx, newidx;
+            idx = indexOf(blocks, function(block) {
+              return block.doc._id === doc._id;
+            });
+            block = blocks[idx];
+            block.scope[cursor] = doc;
+            if (vectorOf != null) {
+              block.vector = vectorOf(doc);
+              blocks.splice(idx, 1);
+              newidx = sortedIndex(blocks, block, function(block) {
+                return block.vector;
+              });
+              blocks.splice(newidx, 0, block);
+              return $animate.move(block.clone, parent, newidx > 0 ? blocks[newidx - 1].clone : top);
+            }
+          };
+          remove = function(id) {
+            var block, idx;
+            idx = indexOf(blocks, function(block) {
+              return block.doc._id === id;
+            });
+            block = blocks[idx];
+            if (block != null) {
+              return $animate.leave(block.clone, function() {
+                return block.scope.$destroy();
+              });
+            }
+          };
+          return $scope.$watch(collection, function() {
+            var process;
+            process = function(result) {
+              var row, _i, _len, _ref1, _results;
+              _ref1 = result.rows;
+              _results = [];
+              for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                row = _ref1[_i];
+                _results.push(add(row.doc));
+              }
+              return _results;
+            };
+            $scope[collection].allDocs({
+              include_docs: true
+            }).then(process);
+            $scope[collection].info().then(function(info) {
+              return $scope[collection].changes({
+                include_docs: true,
+                continuous: true,
+                since: info.update_seq,
+                onChange: function(update) {
+                  if (update.deleted) {
+                    return remove(update.doc._id);
+                  } else {
+                    if (exists(blocks, function(block) {
+                        return block.doc._id === update.doc._id;
+                      })) {
+                      return modify(update.doc);
+                    } else {
+                      return add(update.doc);
+                    }
+                  }
+                }
+              });
+            });
+          });
+        };
+      }
+    };
+  });
+
+}).call(this);
