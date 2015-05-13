@@ -2,6 +2,8 @@
 
 > AngularJS binding for PouchDB
 
+Please see the latest example of this library in use at http://github.com/danielzen/todo-ng-pouchdb
+
 Based on Peter Bacon Darwin's https://github.com/petebacondarwin/angular-firebase
 
 Uses https://github.com/wspringer/angular-pouchdb which:
