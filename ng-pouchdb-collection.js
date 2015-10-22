@@ -70,7 +70,8 @@ angular.module('pouchdb')
       }
 
       db.changes({
-        live: true, onChange: function(change) {
+        live: true
+      }).on('change', function(change) {
           if (!change.deleted) {
             db.get(change.id).then(function(data) {
               if (indexes[change.id] == undefined) { // CREATE / READ
@@ -86,7 +87,6 @@ angular.module('pouchdb')
             removeChild(change.id);
             updateIndexes(indexes[change.id]);
           }
-        }
       });
 
       collection.$add = function(item) {
